@@ -11,6 +11,39 @@ import (
 
 var ProgramName = "gitignore"
 
+const Version = "1.0.0"
+const Usage = `USAGE
+=====
+gitignore <type...>
+    write one or more .gitignore types (e.g. "go", "python", "c++", etc.) into a .gitignore file.
+gitignore --print|-p <type...>
+    print one or more .gitignore types (e.g. "go", "python", "c++", etc.) contents into stdout.
+gitignore --names|--types
+    print list of available gitignore types. Source: <https://github.com/github/gitignore>.
+gitignore --help|-h
+    print this usage information.
+gitignore --version
+    print program's version.
+
+EXAMPLES
+========
+Get list of all gitignore types that are supported
+
+   gitignore --types
+
+Create a .gitignore file for a Go project
+
+   gitignore go
+
+Create a .gitignore file for a Go and a Node.js project
+
+   gitignore go node
+
+Print out concatenated .gitignore for a Go and a Node.js project into stdout
+
+   gitignore --print go node
+`
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, "[ERROR] Missing arguments")
@@ -23,15 +56,21 @@ func main() {
 	printNamesFlag := false
 	printHelpFlag := false
 	printContentsFlag := false
+	printVersionFlag := false
 
 	for _, arg := range os.Args {
-		if arg == "--names" || arg == "--type" {
-			printNamesFlag = true
+		if arg == "--help" || arg == "-h" {
+			printHelpFlag = true
 			break
 		}
 
-		if arg == "--help" || arg == "-h" {
-			printHelpFlag = true
+		if arg == "--version" {
+			printVersionFlag = true
+			break
+		}
+
+		if arg == "--names" || arg == "--types" {
+			printNamesFlag = true
 			break
 		}
 
@@ -41,13 +80,18 @@ func main() {
 		}
 	}
 
-	if printNamesFlag {
-		printNames()
+	if printHelpFlag {
+		fmt.Println(Usage)
 		return
 	}
 
-	if printHelpFlag {
-		printHelp()
+	if printVersionFlag {
+		fmt.Printf("%s v%s\n", ProgramName, Version)
+		return
+	}
+
+	if printNamesFlag {
+		printNames()
 		return
 	}
 
@@ -101,8 +145,4 @@ func printNames() {
 	for _, v := range list {
 		fmt.Println(v)
 	}
-}
-
-func printHelp() {
-	fmt.Printf("USAGE\n")
 }
