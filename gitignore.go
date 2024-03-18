@@ -5,6 +5,11 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"fmt"
+)
+
+const (
+	RepoAPIBaseURL = "https://api.github.com/repos/github/gitignore/contents"
 )
 
 type RepoResponseItem struct {
@@ -12,12 +17,16 @@ type RepoResponseItem struct {
 	DownloadURL string `json:"download_url"`
 }
 
-const (
-	RawFileBaseURL = "https://raw.githubusercontent.com/github/gitignore/master/"
-	RepoAPIBaseURL = "https://api.github.com/repos/github/gitignore/contents"
-)
+type DoesNotExistError struct {
+	Name string
+}
 
-func ResponseJSON() ([]RepoResponseItem, error) {
+func (e *DoesNotExistError) Error() string {
+	return fmt.Sprintf("%s.gitignore does not exist.", e.Name)
+}
+
+
+func RequestJSON() ([]RepoResponseItem, error) {
 	response, err := http.Get(RepoAPIBaseURL)
 	if err != nil {
 		return nil, err
@@ -28,18 +37,18 @@ func ResponseJSON() ([]RepoResponseItem, error) {
 		return nil, err
 	}
 
-	var json []RepoResponseItem
-	err := json.Unmarshal(responseBody, &contents)
+	var contents []RepoResponseItem
+	err = json.Unmarshal(body, &contents)
 	if err != nil {
 		return nil, err
 	}
 
-	return json, nil
+	return contents, nil
 }
 
 func NamesList(responseJSON []RepoResponseItem) []string {
 	names := make([]string, 0)
-	for _, v := range contents {
+	for _, v := range responseJSON {
 		if !strings.HasSuffix(v.Name, ".gitignore") {
 			continue
 		}
@@ -51,8 +60,20 @@ func NamesList(responseJSON []RepoResponseItem) []string {
 	return names
 }
 
-func Gitignore(name string) ([]byte, error) {
-	url := RawFileBaseURL + name + ".gitignore"
+func Gitignore(requestJSON []RepoResponseItem, name string) ([]byte, error) {
+	url := ""
+	for _, v := range requestJSON {
+		if strings.ToLower(v.Name) == strings.ToLower(name + ".gitignore") {
+			url = v.DownloadURL
+			break
+		}
+	}
+
+	if url == "" {
+		return nil, &DoesNotExistError{
+			Name: name,
+		}
+	}
 
 	response, err := http.Get(url)
 	if err != nil {
