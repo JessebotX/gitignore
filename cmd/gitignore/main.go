@@ -57,12 +57,18 @@ func main() {
 }
 
 func printContents(args []string) {
+	response, err := gitignore.RequestJSON()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
 	for _, arg := range args {
-		if strings.HasPrefix(arg, "--") {
+		if strings.HasPrefix(arg, "-") {
 			continue
 		}
 
-		bytes, err := gitignore.Gitignore(arg)
+		bytes, err := gitignore.Gitignore(response, arg)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[WARNING] failed to get %s.gitignore\n", arg)
 			fmt.Fprintln(os.Stderr, err)
@@ -74,18 +80,13 @@ func printContents(args []string) {
 }
 
 func printNames() {
-	response, err := gitignore.RepoResponse()
+	response, err := gitignore.RequestJSON()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Missing arguments")
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	list, err := gitignore.NamesList(response)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Missing arguments")
-		os.Exit(1)
-	}
-
+	list := gitignore.NamesList(response)
 	for _, v := range list {
 		fmt.Println(v)
 	}
