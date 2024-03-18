@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -12,7 +13,7 @@ var ProgramName = "gitignore"
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "Missing arguments")
+		fmt.Fprintln(os.Stderr, "[ERROR] Missing arguments")
 		os.Exit(1)
 	}
 
@@ -51,12 +52,22 @@ func main() {
 	}
 
 	if printContentsFlag {
-		printContents(os.Args[1:])
+		writeContents(os.Stdout, os.Args[1:])
 		return
 	}
+
+	// default write to <current working dir>/.gitignore file
+	f, err := os.Create(".gitignore")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "[ERROR] Cannot create .gitignore in current directory")
+		os.Exit(1)
+	}
+	defer f.Close()
+
+	writeContents(f, os.Args[1:])
 }
 
-func printContents(args []string) {
+func writeContents(w io.Writer, args []string) {
 	response, err := gitignore.RequestJSON()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -75,7 +86,7 @@ func printContents(args []string) {
 			continue
 		}
 
-		fmt.Println(string(bytes))
+		fmt.Fprintf(w, string(bytes) + "\n")
 	}
 }
 
