@@ -11,7 +11,7 @@ import (
 
 var ProgramName = "gitignore"
 
-const Version = "1.0.0"
+const Version = "2.0.0"
 const Usage = `USAGE
 =====
 gitignore <type...>
@@ -69,7 +69,7 @@ func main() {
 			break
 		}
 
-		if arg == "--names" || arg == "--types" {
+		if arg == "--types" || arg == "--names" {
 			printNamesFlag = true
 			break
 		}
@@ -112,37 +112,39 @@ func main() {
 }
 
 func writeContents(w io.Writer, args []string) {
-	response, err := gitignore.RequestJSON()
+	response, err := gitignore.Request()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	defer response.Close()
 
 	for _, arg := range args {
 		if strings.HasPrefix(arg, "-") {
 			continue
 		}
 
-		bytes, err := gitignore.Gitignore(response, arg)
+		bytes, err := gitignore.FetchFromShortName(response, arg)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[WARNING] failed to get %s.gitignore\n", arg)
 			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
 
-		fmt.Fprintf(w, string(bytes) + "\n")
+		fmt.Fprintf(w, string(bytes)+"\n")
 	}
 }
 
 func printNames() {
-	response, err := gitignore.RequestJSON()
+	response, err := gitignore.Request()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	defer response.Close()
 
-	list := gitignore.NamesList(response)
+	list := gitignore.TypesList(response)
 	for _, v := range list {
-		fmt.Println(v)
+		fmt.Println(v.ShortName())
 	}
 }
