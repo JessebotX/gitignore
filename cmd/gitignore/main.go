@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jessebotx/gitignore"
+	"github.com/JessebotX/gitignore"
 )
 
 var ProgramName = "gitignore"
