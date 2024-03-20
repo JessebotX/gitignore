@@ -7,7 +7,7 @@ Fetch GitHub's `.gitignore` files.
 
 ### Installation
 ```shell
-go install github.com/jessebotx/gitignore@latest
+go install github.com/jessebotx/gitignore/cmd/gitignore@latest
 ```
 
 ### Usage
