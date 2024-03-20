@@ -1,13 +1,13 @@
 # gitignore
 Fetch GitHub's `.gitignore` files.
 
-## Install
+## Installation: CLI Tool
 ### Dependencies
 - Go <https://go.dev/>
 
-### Installation
+### Steps
 ```shell
-go install github.com/jessebotx/gitignore/cmd/gitignore@latest
+go install github.com/JessebotX/gitignore/cmd/gitignore@latest
 ```
 
 ### Usage
@@ -17,7 +17,7 @@ List out available gitignore types that can be fetched.
 gitignore --types
 ```
 
-### Examples
+### CLI Examples
 Get list of all gitignore types that are supported
 
 ```shell
@@ -45,7 +45,7 @@ gitignore go node
 Print out .gitignore for a Go and a Node.js project into stdout
 
 ```shell
-gitignore go node
+gitignore go node --print
 ```
 
 ## Permissions/License
